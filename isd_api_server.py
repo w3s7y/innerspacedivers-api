@@ -32,24 +32,25 @@ def handle_message():
     email = request.form['email']
     subject = request.form['subject']
     message = request.form['message']
-    logging.debug("Got message from {} ({}) Subject={} Message={}".format(name, email, subject, message))
+    logging.info("Message from {} ({}) Subject='{}' Message='{}'".format(name, email, subject, message))
 
     orig_url = request.referrer.split('?')[0]
     if name == "" or email == "" or subject == "" or message == "":
-        logging.debug("One or more fields were empty, not sending message to topic.")
+        logging.warning("One or more fields were empty, not sending message to topic.")
         return redirect(orig_url + "?messagesub=false" or "ERROR")
 
     if write_to_sns_topic(name, email, subject, message):
-        logging.debug("Sucessfully wrote to SNS topic")
+        logging.debug("Wrote to SNS topic. redirect to {}".format(orig_url + "?messagesub=true"))
         return redirect(orig_url + "?messagesub=true" or "OK")
     else:
         logging.error("Error writing to SNS topic")
         return redirect(orig_url + "?messagesub=false" or "ERROR")
 
 
-@app.route('/api/healthcheck', methods=['GET'])
+@app.route('/api/heartbeat', methods=['GET'])
 def heartbeat():
     return "OK"
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
