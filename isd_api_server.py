@@ -8,9 +8,11 @@ import os
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
+aws_region = os.environ['SNS_TOPIC'].split(':')[3]
+
 
 def write_to_sns(user_name, user_email, subject_line, message):
-    client = boto3.client('sns')
+    client = boto3.client('sns', region_name=aws_region)
     response = client.publish(
         TopicArn=os.environ['SNS_TOPIC'],
         Message=message,
