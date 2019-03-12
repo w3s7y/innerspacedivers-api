@@ -1,8 +1,6 @@
 import pytest
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
-
 # Modules under test
 import isd_api_server
 

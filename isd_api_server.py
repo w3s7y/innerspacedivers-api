@@ -1,29 +1,31 @@
 from flask import Flask
 from flask import request
 from flask import redirect
+import boto3
 import logging
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
 
-def write_to_sns_topic(user_name, user_email, subject_line, message):
-    #client = boto3.client('sns')
-    #d = {'contact_name': user_name, 'contact_email': user_email, 'contact_subject': subject_line, 'contact_message': message}
-    # response = client.publish(
-    #     TopicArn=os.env['asdsad'],
-    #     Message=json.dumps(d),
-    #     Subject=subject_line,
-    #     MessageStructure='string',
-    #     MessageAttributes={
-    #         'string': {
-    #             'DataType': 'string',
-    #             'StringValue': 'string',
-    #             'BinaryValue': b'bytes'
-    #         }
-    #     }
-    #)
-    return True
+def write_to_sns(user_name, user_email, subject_line, message):
+    client = boto3.client('sns')
+    response = client.publish(
+        TopicArn=os.environ['SNS_TOPIC'],
+        Message=message,
+        Subject=subject_line,
+        MessageStructure='string',
+        MessageAttributes=dict(user_name={
+            'DataType': 'string',
+            'StringValue': user_name
+        }, user_email={
+            'DataType': 'string',
+            'StringValue': user_email
+        })
+    )
+
+    return response
 
 
 @app.route('/api/message', methods=['POST'])
@@ -39,7 +41,7 @@ def handle_message():
         logging.warning("One or more fields were empty, not sending message to topic.")
         return redirect(orig_url + "?messagesub=false" or "ERROR")
 
-    if write_to_sns_topic(name, email, subject, message):
+    if write_to_ses(name, email, subject, message):
         logging.debug("Wrote to SNS topic. redirect to {}".format(orig_url + "?messagesub=true"))
         return redirect(orig_url + "?messagesub=true" or "OK")
     else:
