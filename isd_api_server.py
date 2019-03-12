@@ -15,18 +15,13 @@ def write_to_sns(user_name, user_email, subject_line, message):
     client = boto3.client('sns', region_name=aws_region)
     response = client.publish(
         TopicArn=os.environ['SNS_TOPIC'],
-        Message=message,
+        Message=f"www.innerspacedivers.com has had a contact form submission:\n"
+        f"Name: {user_name}\n"
+        f"Email: {user_email}\n"
+        f"Message: {message}",
         Subject=subject_line,
-        MessageStructure='string',
-        MessageAttributes=dict(user_name={
-            'DataType': 'String',
-            'StringValue': user_name
-        }, user_email={
-            'DataType': 'String',
-            'StringValue': user_email
-        })
+        MessageStructure='string'
     )
-
     return response
 
 
@@ -41,17 +36,17 @@ def handle_message():
     orig_url = request.referrer.split('?')[0]
     if name == "" or email == "" or subject == "" or message == "":
         logging.warning("One or more fields were empty, not sending message to topic.")
-        return redirect(orig_url + "?messagesub=false" or "ERROR")
+        return redirect(f"{orig_url}?messagesub=false" or "ERROR")
 
-    if write_to_sns(name, email, subject, message) == dict:
+    if type(write_to_sns(name, email, subject, message)) is dict:
         logging.debug("Wrote to SNS topic. redirect to {}".format(orig_url + "?messagesub=true"))
-        return redirect(orig_url + "?messagesub=true" or "OK")
+        return redirect(f"{orig_url}?messagesub=true" or "OK")
     else:
-        logging.error("Error writing to SNS topic")
-        return redirect(orig_url + "?messagesub=false" or "ERROR")
+        logging.error(f"Error writing to SNS topic... name = {name}, email = {email}, subject = {subject}, message = {message}")
+        return redirect(f"{orig_url}?messagesub=false" or "ERROR")
 
 
-@app.route('/api/heartbeat', methods=['GET'])
+@app.route('/api/heartbeat', methods=['GET', 'HEAD', 'OPTIONS'])
 def heartbeat():
     return "OK"
 
