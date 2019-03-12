@@ -41,7 +41,7 @@ def handle_message():
         logging.warning("One or more fields were empty, not sending message to topic.")
         return redirect(orig_url + "?messagesub=false" or "ERROR")
 
-    if write_to_ses(name, email, subject, message):
+    if write_to_sns(name, email, subject, message) == dict:
         logging.debug("Wrote to SNS topic. redirect to {}".format(orig_url + "?messagesub=true"))
         return redirect(orig_url + "?messagesub=true" or "OK")
     else:
