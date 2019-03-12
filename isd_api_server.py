@@ -19,10 +19,10 @@ def write_to_sns(user_name, user_email, subject_line, message):
         Subject=subject_line,
         MessageStructure='string',
         MessageAttributes=dict(user_name={
-            'DataType': 'string',
+            'DataType': 'String',
             'StringValue': user_name
         }, user_email={
-            'DataType': 'string',
+            'DataType': 'String',
             'StringValue': user_email
         })
     )
