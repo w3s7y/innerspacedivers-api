@@ -5,7 +5,7 @@ import boto3
 import logging
 import os
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 
 aws_region = os.environ['SNS_TOPIC'].split(':')[3]
